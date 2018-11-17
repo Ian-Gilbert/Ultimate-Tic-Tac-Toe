@@ -30,37 +30,37 @@ class TicTacToeBoard:
         return True
 
 
-class BigBoard(TicTacToeBoard):
+class GlobalBoard(TicTacToeBoard):
     def __init__(self):
         TicTacToeBoard.__init__(self)
-        self.small_boards = [SmallBoard() for _ in range(9)]
+        self.local_boards = [LocalBoard() for _ in range(9)]
 
     def draw_board(self):
         pass
 
     def print_board(self):
         for x in range(3):
-            print(self.small_boards[0].board[x], '\t', self.small_boards[1].board[x], '\t', self.small_boards[2].board[x])
+            print(self.local_boards[0].board[x], '\t', self.local_boards[1].board[x], '\t', self.local_boards[2].board[x])
         print()
         for x in range(3):
-            print(self.small_boards[3].board[x], '\t', self.small_boards[4].board[x], '\t', self.small_boards[5].board[x])
+            print(self.local_boards[3].board[x], '\t', self.local_boards[4].board[x], '\t', self.local_boards[5].board[x])
         print()
         for x in range(3):
-            print(self.small_boards[6].board[x], '\t', self.small_boards[7].board[x], '\t', self.small_boards[8].board[x])
+            print(self.local_boards[6].board[x], '\t', self.local_boards[7].board[x], '\t', self.local_boards[8].board[x])
         print()
 
-    def mark_board(self, sb_index, player: int):
-        if sb_index < 3:
+    def mark_board(self, lb_index, player: int):
+        if lb_index < 3:
             row = 0
-        elif sb_index < 6:
+        elif lb_index < 6:
             row = 1
         else:
             row = 2
-        col = sb_index % 3
+        col = lb_index % 3
         self.board[row][col] = player
 
 
-class SmallBoard(TicTacToeBoard):
+class LocalBoard(TicTacToeBoard):
     def __init__(self):
         TicTacToeBoard.__init__(self)
         self.focus = True

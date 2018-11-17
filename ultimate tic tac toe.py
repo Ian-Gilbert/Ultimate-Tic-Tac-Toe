@@ -3,8 +3,8 @@ import sys
 import boardclasses as bc
 
 
-def get_sb_name(key):
-    # Returns the name of the small board given sb_index as a key
+def get_lb_name(key):
+    # Returns the name of the local board given lb_index as a key
     switcher = {
         0: "top left",
         1: "top center",
@@ -20,49 +20,52 @@ def get_sb_name(key):
 
 
 def get_next_board(old_row, old_col):
-    """Use previous move to return the next small board"""
-    new_sb_index = old_row * 3 + old_col
-    new_sb = board.small_boards[new_sb_index]
+    """Use previous move to return the next local board"""
+    new_lb_index = old_row * 3 + old_col
+    new_lb = board.local_boards[new_lb_index]
 
     # If the next board has tic tac toe or is full
-    if not new_sb.playable:
-        for small_board in board.small_boards:
-            small_board.focus = small_board.playable
-        while not new_sb.focus:
-            print(f"The {get_sb_name(sb_index)} board is not playable.")
-            new_sb_index = int(input(f"Player {player}, please select your small board (1-9): ")) - 1
-            new_sb = board.small_boards[new_sb_index]
+    if not new_lb.playable:
+        for local_board in board.local_boards:
+            local_board.focus = local_board.playable
+        while not new_lb.focus:
+            print(f"The {get_lb_name(lb_index)} board is not playable.")
+            new_lb_index = int(input(f"Player {player}, please select your local board (1-9): ")) - 1
+            new_lb = board.local_boards[new_lb_index]
 
-    return new_sb_index, new_sb
+    return new_lb_index, new_lb
 
 
-board = bc.BigBoard()
+board = bc.GlobalBoard()
 player = 1
 
-sb_index = int(input(f"Player {player}, please select your small board (1-9): ")) - 1
-sb = board.small_boards[sb_index]
+lb_index = int(input(f"Player {player}, please select your local board (1-9): ")) - 1
+lb = board.local_boards[lb_index]
+
+# TODO: reorganize logic so that board number is requested at the beginning of each turn, and the focus is updated at
+# TODO: the end of the turn, to better match with how the GUI will work
 
 while True:
     board.print_board()
-    print(f"The {get_sb_name(sb_index)} board is in focus.")
+    print(f"The {get_lb_name(lb_index)} board is in focus.")
     row = int(input(f"Player {player}, please enter the row (1-3): ")) - 1
     col = int(input(f"Player {player}, please enter the column (1-3): ")) - 1
-    if sb.board[row][col] == 0:
-        sb.board[row][col] = player
+    if lb.board[row][col] == 0:
+        lb.board[row][col] = player
 
-        if sb.has_tic_tac_toe():
-            sb.playable = False
-            board.mark_board(sb_index, player)
+        if lb.has_tic_tac_toe():
+            lb.playable = False
+            board.mark_board(lb_index, player)
             if board.has_tic_tac_toe():
                 print(f"Player {player} has won!")
                 break
             elif board.is_full():
                 print("The game is a draw.")
                 break
-        elif sb.is_full():
-            sb.playable = False
+        elif lb.is_full():
+            lb.playable = False
 
         player = (player % 2) + 1
-        sb_index, sb = get_next_board(row, col)
+        lb_index, lb = get_next_board(row, col)
     else:
         print("That space has already been played.")
