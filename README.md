@@ -18,6 +18,7 @@ pip install pygame
 ```
 
 ## TODO
+* ~~Build a command line game~~
 * ~~Reorganize logic so that board number is requested at the beginning of each turn, and the focus is updated at the end of the turn, to better match how the GUI will work~~
 * ~~Build the GUI~~
 * Try to speed up the cursor trail
