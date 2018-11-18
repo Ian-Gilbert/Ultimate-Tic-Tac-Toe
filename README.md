@@ -1,5 +1,5 @@
 # Ultimate Tic Tac Toe
-This is a game of Ultimate Tic Tac Toe, written in python. The GUI is created using pygame.
+This is a game of Ultimate Tic Tac Toe, written in python. The GUI is created using PyGame.
 
 ## How To Play
 To start, ultimate tic tac toe is the same as the standard game: there are nine squares arranged in a 3x3 grid which can each be either an 'X' or an 'O', and three in a row wins the game. Unlike the original game, however, you cannot simply mark a sqaure as 'X' or 'O'. Instead, each square consists of an additional tic tac toe game, which must be won to mark the big square. The overall board is called the 'global board', and the smaller boards are called 'local boards'. The game is won when a player wins three local boards in a row.
@@ -18,7 +18,7 @@ pip install pygame
 ```
 
 ## TODO
-* ~~Build a command line game~~
+* ~~Build a command line version of the game~~
 * ~~Reorganize logic so that board number is requested at the beginning of each turn, and the focus is updated at the end of the turn, to better match how the GUI will work~~
 * ~~Build the GUI~~
 * Try to speed up the cursor trail
