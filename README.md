@@ -10,6 +10,8 @@ On the first turn, Player 'X' can choose any square in any local board they like
 
 For more information about the game, check out [this link](https://mathwithbaddrawings.com/2013/06/16/ultimate-tic-tac-toe/).
 
+For an online version of the game, check out [CreativityGames](http://ultimatetictactoe.creativitygames.net/) or [bejofo](http://bejofo.net/ttt).
+
 ## Prerequisites
 In order to run the game you must have PyGame installed on your computer, which can be done using [pip](https://pip.pypa.io/en/stable/):
 
