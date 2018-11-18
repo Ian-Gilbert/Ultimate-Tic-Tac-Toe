@@ -18,6 +18,12 @@ pip install pygame
 ```
 
 ## TODO
-  * ~~Reorganize logic so that board number is requested at the beginning of each turn, and the focus is updated at the end of the turn, to better match with how the GUI will work~~
-  * ~~Build the GUI~~
-  * Create an AI (maybe)
+* ~~Reorganize logic so that board number is requested at the beginning of each turn, and the focus is updated at the end of the turn, to better match how the GUI will work~~
+* ~~Build the GUI~~
+* Try to speed up the cursor trail
+* Add a menu area
+  * Reset Button
+  * Button to display the rules
+  * Choose to play 1v1 or against the AI (once that becomes available)
+  * Display text (i.e. who's turn, display the winner, etc...)
+* Create an AI (maybe)
