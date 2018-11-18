@@ -35,10 +35,10 @@ class GlobalBoard(TicTacToeBoard):
         TicTacToeBoard.__init__(self)
         self.local_boards = [LocalBoard() for _ in range(9)]
 
-    def draw_board(self):
-        pass
-
     def print_board(self):
+        print()
+        print('-' * 35)
+        print()
         for x in range(3):
             print(self.local_boards[0].board[x], '\t', self.local_boards[1].board[x], '\t', self.local_boards[2].board[x])
         print()
@@ -47,7 +47,6 @@ class GlobalBoard(TicTacToeBoard):
         print()
         for x in range(3):
             print(self.local_boards[6].board[x], '\t', self.local_boards[7].board[x], '\t', self.local_boards[8].board[x])
-        print()
 
     def mark_board(self, lb_index, player: int):
         if lb_index < 3:
