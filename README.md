@@ -22,6 +22,7 @@ pip install pygame
 * ~~Reorganize logic so that board number is requested at the beginning of each turn, and the focus is updated at the end of the turn, to better match how the GUI will work~~
 * ~~Build the GUI~~
 * Try to speed up the cursor trail
+* Higher quality 'O'. Or lower quality 'X' and go for the hand-drawn look
 * Add a menu area
   * Reset Button
   * Button to display the rules
