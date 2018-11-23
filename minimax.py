@@ -9,12 +9,14 @@ HUMAN = 0
 
 
 def heuristic(state):
-    # heuristic evaluation of the current board state
+    """Heuristic evaluation of the current board state. Values of score can be altered to change the mindset of the bot.
+    i.e. a high score for winning will make it very aggressive and leave 2-in-a-rows open, while a low score for losing
+    will make it do the opposite"""
     if state.has_tic_tac_toe(COMP):
         score = 1
     elif state.has_tic_tac_toe(HUMAN):
         score = -1
-    else:
+    else:  # draw/undetermined outcome
         score = 0
     return score
 
