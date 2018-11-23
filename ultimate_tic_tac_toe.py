@@ -1,6 +1,8 @@
+import random as rand
 import pygame
 import sys
 import boardclasses
+import minimax
 
 
 def draw_x(center):
@@ -19,8 +21,7 @@ def draw_board():
     for outer_x in range(3):
         for outer_y in range(3):
             # Get the current local board
-            index = outer_y * 3 + outer_x
-            local_board = board.local_boards[index]
+            local_board = global_board.local_boards[outer_y * 3 + outer_x]
 
             # Top left coordinate of the current local board
             board_origin_x = BOARDERSIZE + ((LOCALBOARDSIZE + WHITESPACE) * outer_x)
@@ -29,9 +30,9 @@ def draw_board():
             # Color the board accordingly if it is won by X or O, or if it is in focus
             if local_board.focus and not game_over:  # if the game is over, nothing is in focus
                 pygame.draw.rect(screen, WHITE, (board_origin_x, board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
-            elif board.board[outer_y][outer_x] == 1:
+            elif global_board.board[outer_y][outer_x] == 1:
                 pygame.draw.rect(screen, LIGHT_BLUE, (board_origin_x, board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
-            elif board.board[outer_y][outer_x] == 2:
+            elif global_board.board[outer_y][outer_x] == 2:
                 pygame.draw.rect(screen, LIGHT_RED, (board_origin_x, board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
 
             # Draw the grid lines for the local board
@@ -61,8 +62,8 @@ def draw_board():
                         pygame.draw.circle(screen, RED, center, DIFF, 4)
 
 
-# def get_lb_name(key):
-#     # Returns the physical location of the local board given lb_index as a key (for the command line)
+# def get_lb_name(local_board):
+#     # Returns the physical location of the local board given lb as a key (for the command line)
 #     switcher = {
 #         0: "top left",
 #         1: "top center",
@@ -74,15 +75,15 @@ def draw_board():
 #         7: "bottom center",
 #         8: "bottom right"
 #     }
-#     return switcher.get(key)
+#     return switcher.get(local_board.index)
 
 
 def get_inputs():
-    """Gets the current position of the mouse and returns the local board index and row and column coordinates of the
-    square that the mouse is currently in. If the mouse is not in a square, then index will return None."""
+    """Gets the current position of the mouse and returns the local board, as well as row and column coordinates of the
+    square that the mouse is currently in. If the mouse is not in a square, then local_board will return None."""
 
     x_pos, y_pos = pygame.mouse.get_pos()  # current x and y coordinates of the mouse
-    index = None  # default value for index
+    local_board = None  # default value for local_board
 
     # For each local board
     for x in range(3):
@@ -91,21 +92,21 @@ def get_inputs():
             board_origin_x = BOARDERSIZE + ((LOCALBOARDSIZE + WHITESPACE) * x)
             board_origin_y = BOARDERSIZE + ((LOCALBOARDSIZE + WHITESPACE) * y)
 
-            # If the mouse is over one of the boards, set index accordingly
+            # If the mouse is over one of the boards, set local_board accordingly
             if board_origin_x < x_pos < board_origin_x + LOCALBOARDSIZE and \
                     board_origin_y < y_pos < board_origin_y + LOCALBOARDSIZE:
-                index = y * 3 + x
+                local_board = global_board.local_boards[y * 3 + x]
                 break
         # How to break out of nested for loops in python:
         else:  # if the inner loop does not break, continue
             continue
         break  # if the inner loop does break, then break out of the outer loop too
 
-    # row and col will be nonsense if the mouse is not over a board. Need to ensure index is not None before using
+    # row and col will be nonsense if the mouse is not over a board. Need to ensure local_board is not None before using
     row_pos = (y_pos - board_origin_y) // SQUARESIZE
     col_pos = (x_pos - board_origin_x) // SQUARESIZE
 
-    return index, row_pos, col_pos
+    return local_board, row_pos, col_pos
 
 
 # def get_next_move():
@@ -115,42 +116,80 @@ def get_inputs():
 #         next_lb_index = int(input(f"Player {player}, please select your local board (1-9): ")) - 1
 #         next_lb = board.local_boards[next_lb_index]
 #         if next_lb.focus:
-#             print(f"The {get_lb_name(next_lb_index)} board is in focus.")
+#             print(f"The {get_lb_name(next_lb.index)} board is in focus.")
 #             next_row = int(input(f"Player {player}, please enter the row (1-3): ")) - 1
 #             next_col = int(input(f"Player {player}, please enter the column (1-3): ")) - 1
 #
 #             if next_lb.board[next_row][next_col] == 0:
-#                 return next_lb_index, next_lb, next_row, next_col
+#                 return next_lb, next_row, next_col
 #             else:
 #                 print("That space has already been played.")
 #         else:
-#             print(f"The {get_lb_name(next_lb_index)} board is not playable.")
+#             print(f"The {get_lb_name(next_lb.index)} board is not playable.")
 
 
 def update_focus(old_row, old_col):
     """Use the previous move to set the focus of the local boards for the next turn"""
 
     # Local board in the same position as the previous guess. May or may not be playable
-    next_lb_index = (old_row * 3) + old_col
-    next_lb = board.local_boards[next_lb_index]
+    next_lb = global_board.local_boards[old_row * 3 + old_col]
 
     # if the board is playable, set focus to True, and all others to False
     if next_lb.playable:
-        for local_board in board.local_boards:
+        for local_board in global_board.local_boards:
             local_board.focus = False
         next_lb.focus = True
     # if the board is not playable, set all playable boards in focus, and all non-playable boards out of focus
     else:
-        for local_board in board.local_boards:
+        for local_board in global_board.local_boards:
             local_board.focus = local_board.playable
 
 
+def make_move(local_board, row_pos, col_pos):
+    global player
+    global winner
+    global game_over
+
+    local_board.board[row_pos][col_pos] = player  # set space to player
+
+    # Check if this move determines the outcome of the local board (win, lose, draw)
+    if local_board.has_tic_tac_toe(player):
+        # if local board has been won, set playable to False, then mark the global board
+        local_board.playable = False
+        global_board.mark_global_board(local_board, player)
+
+        # Now check if this determines the outcome of the global board. If so, the game is over
+        if global_board.has_tic_tac_toe(player):
+            winner = player
+            game_over = True
+        elif global_board.is_full():
+            game_over = True
+
+    # if the local board is a draw
+    elif local_board.is_full():
+        local_board.playable = False
+
+    # update the focus of the local boards for the next turn
+    update_focus(row, col)
+
+    global_board.print_board()  # Command Line
+    draw_board()  # GUI
+    pygame.display.update()
+
+    # switch player 1 <-> 2
+    player = (player % 2) + 1
+
+
 # Global board
-board = boardclasses.GlobalBoard()
-board.print_board()  # command line
+global_board = boardclasses.GlobalBoard()
+global_board.print_board()  # command line
 
 player = 1  # player will always be 1 or 2. 1 -> 'X' and 2 -> 'O'
 winner = 0  # record the winner so it can be displayed
+
+# Decide whether the bot goes first or second
+bot = rand.randint(1, 2)  # set bot = 0 for 2 human players
+# bot = 0
 
 game_over = False  # break out of the game loop when the game ends
 
@@ -188,61 +227,40 @@ pygame.display.update()
 
 # Game loop
 while not game_over:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONUP:
+    # Bot turn
+    if player == bot:
+        lb, row, col = minimax.bot_turn(global_board, bot)  # get the bot's move
+        make_move(lb, row, col)  # record the move and update the GUI
+    else:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
 
-            # get the board index, and row and col coordinates from get_inputs(). Check if lb_index is None
-            lb_index, row, col = get_inputs()
-            if lb_index is not None:
-                lb = board.local_boards[lb_index]
+            # Human Turn
+            if event.type == pygame.MOUSEBUTTONUP and player != bot:
+                # checking !bot makes it easier to switch to 2 player
 
-                # Check if selected space has already been played
-                if lb.focus and lb.board[row][col] == 0:
-                    lb.board[row][col] = player  # set space to player
+                # Get lb, and row and col coordinates from get_inputs(). Check if lb is None
+                lb, row, col = get_inputs()
+                if lb is not None:
+                    # Check if selected space has already been played
+                    if lb.focus and lb.board[row][col] == 0:
+                        make_move(lb, row, col)
 
-                    # Check if this move determines the outcome of the local board (win, lose, draw)
-                    if lb.has_tic_tac_toe():
-                        # if local board has been won, set playable to False, then mark the global board
-                        lb.playable = False
-                        board.mark_board(lb_index, player)
-
-                        # Now check if this determines the outcome of the global board. If so, the game is over
-                        if board.has_tic_tac_toe():
-                            winner = player
-                            game_over = True
-                        elif board.is_full():
-                            game_over = True
-
-                    # if the local board is a draw
-                    elif lb.is_full():
-                        lb.playable = False
-
-                    # update the focus of the local boards for the next turn
-                    update_focus(row, col)
-
-                    board.print_board()  # Command Line
-                    draw_board()  # GUI
-                    pygame.display.update()
-
-                    # switch player 1 <-> 2
-                    player = (player % 2) + 1
-
-        # if the mouse has not been clicked, draw a trail that shows whose turn it is
-        else:
-            mouse = pygame.mouse.get_pos()
-
-            # draw an 'X' or 'O' where the mouse is pointed
-            if player == 1:
-                draw_x(mouse)
+            # if the mouse has not been clicked, draw a trail that shows whose turn it is
             else:
-                pygame.draw.circle(screen, RED, mouse, DIFF, 4)
+                mouse = pygame.mouse.get_pos()
 
-            # after the display is updated, redraw the board so that the 'X' or 'O' will disappear the next time the
-            # display is updated
-            pygame.display.update()
-            draw_board()
+                # draw an 'X' or 'O' where the mouse is pointed
+                if player == 1:
+                    draw_x(mouse)
+                else:
+                    pygame.draw.circle(screen, RED, mouse, DIFF, 4)
+
+                # after the display is updated, redraw the board so that the 'X' or 'O' will disappear the next time the
+                # display is updated
+                pygame.display.update()
+                draw_board()
 
 # Display the game result
 if winner == 0:
