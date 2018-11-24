@@ -4,14 +4,25 @@ import copy
 import boardclasses
 
 
+"""
+This is an edited version from the following source:
+Link: https://github.com/Cledersonbc/tic-tac-toe-minimax
+
+An implementation of Minimax AI Algorithm in Tic Tac Toe,
+using Python.
+This software is available under GPL license.
+Author: Clederson Cruz
+Year: 2017
+License: GNU GENERAL PUBLIC LICENSE (GPL)
+"""
+
+
 COMP = 0
 HUMAN = 0
 
 
 def heuristic(state):
-    """Heuristic evaluation of the current board state. Values of score can be altered to change the mindset of the bot.
-    i.e. a high score for winning will make it very aggressive and leave 2-in-a-rows open, while a low score for losing
-    will make it do the opposite"""
+    """Heuristic evaluation of the current board state"""
     if state.has_tic_tac_toe(COMP):
         score = 1
     elif state.has_tic_tac_toe(HUMAN):

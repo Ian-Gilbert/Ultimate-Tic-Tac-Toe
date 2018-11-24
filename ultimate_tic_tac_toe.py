@@ -188,8 +188,10 @@ player = 1  # player will always be 1 or 2. 1 -> 'X' and 2 -> 'O'
 winner = 0  # record the winner so it can be displayed
 
 # Decide whether the bot goes first or second
-bot = rand.randint(1, 2)  # set bot = 0 for 2 human players
-# bot = 0
+bot = rand.randint(1, 2)  # bot goes first or second at random
+# bot = 0  # 2 player
+# bot = 1  # bot goes first
+# bot = 2  # bot goes second
 
 game_over = False  # break out of the game loop when the game ends
 
@@ -247,7 +249,7 @@ while not game_over:
                     if lb.focus and lb.board[row][col] == 0:
                         make_move(lb, row, col)
 
-            # if the mouse has not been clicked, draw a trail that shows whose turn it is
+            # If the mouse has not been clicked, draw a trail that shows whose turn it is
             else:
                 mouse = pygame.mouse.get_pos()
 
