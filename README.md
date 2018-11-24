@@ -1,7 +1,7 @@
 # Ultimate Tic Tac Toe
 This is a game of Ultimate Tic Tac Toe, written in python. The GUI is created using PyGame.
 
-<p align="center">
+<p align="center" width=75%>
 	<img src="Images/Empty Board.png"></img>
 </p>
 
