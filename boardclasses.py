@@ -6,7 +6,7 @@ class TicTacToeBoard:
 
     # does this board have tic tac toe
     def has_tic_tac_toe(self, player):
-        """Checks all possible tic tac toes. Minimax needs to know who won the game, so that option is included."""
+        """Checks all possible tic tac toes for the given player"""
 
         # Check for horizontal and vertical tic tac toe
         for x in range(3):
@@ -32,6 +32,7 @@ class TicTacToeBoard:
 
     # is every space taken
     def is_full(self):
+        """Checks if every space on the board has been played (i.e. there is a draw)"""
         for row in range(3):
             if 0 in self.board[row]:
                 return False
@@ -44,11 +45,11 @@ class TicTacToeBoard:
 class GlobalBoard(TicTacToeBoard):
     def __init__(self):
         TicTacToeBoard.__init__(self)
-        # 3x3 grid of local boards
-        self.local_boards = [LocalBoard(i) for i in range(9)]
+        self.local_boards = [LocalBoard(i) for i in range(9)]  # 3x3 grid of local boards
 
     # prints the local boards in the command line
     def print_board(self):
+        """Prints the board to the console"""
         print()
         print('-' * 35)
         print()
@@ -64,9 +65,10 @@ class GlobalBoard(TicTacToeBoard):
             print(self.local_boards[6].board[x], '\t', self.local_boards[7].board[x], '\t', self.local_boards[8].board[x])
 
     # mark the global board when a local board has been won
-    def mark_global_board(self, lb, player: int):
-        row = lb.index // 3
-        col = lb.index % 3
+    def mark_global_board(self, local_board, player):
+        """Records when a local board has been won"""
+        row = local_board.index // 3
+        col = local_board.index % 3
         self.board[row][col] = player
 
 

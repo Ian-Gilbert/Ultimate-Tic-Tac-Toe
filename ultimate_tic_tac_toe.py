@@ -6,6 +6,7 @@ import minimax
 
 
 def draw_x(center):
+    """Draws a blue 'X' in the GUI centered at the given point"""
     # Draws a blue 'X' given the center crossing point of the 'X'
     pygame.draw.line(screen, BLUE, center, (center[0] + DIFF, center[1] + DIFF), 5)
     pygame.draw.line(screen, BLUE, center, (center[0] - DIFF, center[1] + DIFF), 5)
@@ -146,6 +147,7 @@ def update_focus(old_row, old_col):
 
 
 def make_move(local_board, row_pos, col_pos):
+    """Takes a local board and the coordinates of a space on the board, and marks the space for the current player"""
     global player
     global winner
     global game_over
