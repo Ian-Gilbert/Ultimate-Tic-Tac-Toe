@@ -16,11 +16,6 @@ License: GNU GENERAL PUBLIC LICENSE (GPL)
 """
 
 
-# Don't mind me, just doin a little instantiating over here
-COMP = 0
-HUMAN = 0
-
-
 def heuristic(state, depth):
     """
     Heuristic evaluation of the current board state
