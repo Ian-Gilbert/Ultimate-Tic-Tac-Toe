@@ -28,9 +28,9 @@ def heuristic(state, depth):
     :param depth: the number of empty spaces left on the board. Preference is given for faster wins and slower losses.
     """
     if state.has_tic_tac_toe(COMP):
-        score = depth
+        score = 1 + depth
     elif state.has_tic_tac_toe(HUMAN):
-        score = -depth
+        score = -(1 + depth)
     else:  # draw/undetermined outcome
         score = 0
     return score
