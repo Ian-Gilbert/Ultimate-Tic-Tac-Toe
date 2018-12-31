@@ -95,7 +95,7 @@ class Button:
 
 
 class GameOptionButton(Button):
-    """Each option in the GameOptions menu"""
+    """Each option in the GameOptions menu. Extends Button class"""
 
     def __init__(self, pos, text):
         Button.__init__(self, pos, text, width=int(.45 * LOCALBOARDSIZE), height=int(.75 * SQUARESIZE),
