@@ -43,11 +43,11 @@ pip install pygame
 * ~~Build a command line version of the game~~
 * ~~Reorganize logic so that board number is requested at the beginning of each turn, and the focus is updated at the end of the turn, to better match how the GUI will work~~
 * ~~Build the GUI~~
-* Add a menu area
-  * Reset Button
-  * Button to display the rules
-  * Choose to play 1v1 or against the AI
-  * Display text (i.e. who's turn, display the winner, etc...)
+* ~~Add a menu area~~
+  * ~~Reset Button~~
+  * ~~Button to display the rules~~
+  * ~~Choose to play 1v1 or against the AI~~
+  * ~~Display text (i.e. who's turn, display the winner, etc...)~~
 * Create an AI
   * ~~Easy difficulty (minimax)~~
   * Harder difficulty (Monte Carlo Tree Search Algorithm)
