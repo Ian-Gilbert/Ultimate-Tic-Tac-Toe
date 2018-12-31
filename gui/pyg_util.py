@@ -107,6 +107,7 @@ class GameOptionButton(Button):
         self.update_surfaces()
 
     def update_surfaces(self):
+        """Extends the update() method from the Button class"""
         # update regular surfaces
         self.update()
 
@@ -116,11 +117,13 @@ class GameOptionButton(Button):
         w = self.rect.width  # syntactic sugar
         h = self.rect.height  # syntactic sugar
 
+        # render font on selected_surface
         caption_surface = FONT.render(self.text, True, LIGHT_GRAY)
         caption_rect = caption_surface.get_rect()
         caption_rect.center = w // 2, h // 2
         self.selected_surface.blit(caption_surface, caption_rect)
 
+        # draw border around selected_surface
         pygame.draw.rect(self.selected_surface, BLACK, pygame.Rect((0, 0, w, h)), 1)  # black border around everything
         pygame.draw.line(self.selected_surface, WHITE, (1, 1), (w - 2, 1))
         pygame.draw.line(self.selected_surface, WHITE, (1, 1), (1, h - 2))
@@ -130,6 +133,7 @@ class GameOptionButton(Button):
         pygame.draw.line(self.selected_surface, GRAY, (w - 2, 2), (w - 2, h - 2))
 
     def draw_option(self, surface, update=True):
+        """Extends the draw() method from the Button class"""
         if self.selected:
             surface.blit(self.selected_surface, self.rect)
         else:
@@ -161,9 +165,10 @@ class GameOptions:
                 self.options[i].selected = True
 
     def is_event(self, event, mouse, surface):
+        """Kind of extends the is_button_event() method from the Button class"""
         for button in self.options:
             if button.is_button_event(event, mouse):
-                if event.type == pygame.MOUSEBUTTONDOWN and not button.selected:
+                if event.type == pygame.MOUSEBUTTONUP and not button.selected:
                     for button_again in self.options:  # button_again will always make me laugh
                         if button is button_again:
                             button_again.selected = True
@@ -174,10 +179,12 @@ class GameOptions:
                 return True
 
     def draw(self, surface):
+        """Draws each button"""
         for button in self.options:
             button.draw_option(surface, False)
 
     def get_option(self):
+        """Returns the text of the selected option"""
         for button in self.options:
             if button.selected:
                 return button.text

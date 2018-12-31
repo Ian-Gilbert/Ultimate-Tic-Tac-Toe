@@ -24,7 +24,7 @@ newgamebutton = pyg_util.Button((GLOBALBOARDSIZE + BOARDERSIZE, SCREENHEIGHT - B
 quitbutton = pyg_util.Button((GLOBALBOARDSIZE + BOARDERSIZE, SCREENHEIGHT - BOARDERSIZE - int(1.25 * SQUARESIZE),
                               LOCALBOARDSIZE, SQUARESIZE), 'Quit Game', colorfamily=RED_FAMILY)
 alg_options = pyg_util.GameOptions((GLOBALBOARDSIZE + BOARDERSIZE, LOCALBOARDSIZE + WHITESPACE), 'Very Easy',
-                                   '2 PLayer', 'Very Easy')
+                                   '2 Player', 'Very Easy', 'Easy', 'Medium', 'Hard')
 order_options = pyg_util.GameOptions(
     (GLOBALBOARDSIZE + BOARDERSIZE + int(.55 * LOCALBOARDSIZE), LOCALBOARDSIZE + WHITESPACE), 'Random', 'Random',
     'First', 'Second')
