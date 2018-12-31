@@ -1,7 +1,7 @@
 from math import inf
-import random as rand
-import copy
-import boardclasses
+from random import choice
+from copy import deepcopy
+from boardclasses import TicTacToeBoard
 
 
 """
@@ -23,9 +23,9 @@ def heuristic(state, depth):
     :param depth: the number of empty spaces left on the board. Preference is given for faster wins and slower losses.
     """
     if state.has_tic_tac_toe(COMP):
-        score = 1 + depth
+        score = depth + 1
     elif state.has_tic_tac_toe(HUMAN):
-        score = -(1 + depth)
+        score = -(depth + 1)
     else:  # draw/undetermined outcome
         score = 0
     return score
@@ -48,7 +48,7 @@ def get_empty_cells(state):
 def minimax(state, depth, player):
     """
     The minimax algorithm itself. Returns a random move if the depth is 9, otherwise the first move would always be the
-    top right corner.
+    top left corner.
     :param state: the current board state
     :param depth: the number of empty spaces left on the board
     :param player: who makes the next move (1 or 2)
@@ -56,8 +56,8 @@ def minimax(state, depth, player):
     move, defined by the heuristic function
     """
     if depth == 9:
-        row = rand.choice([0, 1, 2])
-        col = rand.choice([0, 1, 2])
+        row = choice([0, 1, 2])
+        col = choice([0, 1, 2])
         return row, col, ''
 
     if player == COMP:
@@ -104,8 +104,8 @@ def bot_turn(global_board, bot):
     if all(lb.focus == lb.playable for lb in global_board.local_boards):
         # Use minimax on the global board to determine the next local board
         depth = len(get_empty_cells(global_board))
-        state = boardclasses.TicTacToeBoard()
-        state.board = copy.deepcopy(global_board.board)
+        state = TicTacToeBoard()
+        state.board = deepcopy(global_board.board)
         row, col, _ = minimax(state, depth, COMP)
 
         local_board = global_board.local_boards[row * 3 + col]
@@ -119,8 +119,8 @@ def bot_turn(global_board, bot):
 
     # local_board now defined. Now use minimax to find row and col of next move
     depth = len(get_empty_cells(local_board))
-    state = boardclasses.TicTacToeBoard()
-    state.board = copy.deepcopy(local_board.board)
+    state = TicTacToeBoard()
+    state.board = deepcopy(local_board.board)
     row, col, _ = minimax(state, depth, COMP)
 
     return local_board, row, col

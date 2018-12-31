@@ -1,22 +1,103 @@
 import random as rand
-import pygame
 import sys
-import boardclasses
+from boardclasses import GlobalBoard
 import minimax
+from gui.pyg_init import *  # contains pygame import
+from gui import pyg_util
+
+"""PyGame Initialization"""
+pygame.init()
+
+# define the main screen
+screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
+pygame.display.set_caption("Ultimate Tic Tac Toe")
+
+rules = pyg_util.RulesScreen()
+
+# menu items
+textarea = pyg_util.TextArea()
+
+rulesbutton = pyg_util.Button((GLOBALBOARDSIZE + BOARDERSIZE, BOARDERSIZE + int(1.75 * SQUARESIZE),
+                               LOCALBOARDSIZE, SQUARESIZE), 'Show Rules', colorfamily=BLUE_FAMILY, textcolor=LIGHT_GRAY)
+newgamebutton = pyg_util.Button((GLOBALBOARDSIZE + BOARDERSIZE, SCREENHEIGHT - BOARDERSIZE - int(2.75 * SQUARESIZE),
+                                 LOCALBOARDSIZE, SQUARESIZE), 'New Game', colorfamily=GREEN_FAMILY)
+quitbutton = pyg_util.Button((GLOBALBOARDSIZE + BOARDERSIZE, SCREENHEIGHT - BOARDERSIZE - int(1.25 * SQUARESIZE),
+                              LOCALBOARDSIZE, SQUARESIZE), 'Quit Game', colorfamily=RED_FAMILY)
+alg_options = pyg_util.GameOptions((GLOBALBOARDSIZE + BOARDERSIZE, LOCALBOARDSIZE + WHITESPACE), 'Very Easy',
+                                   '2 PLayer', 'Very Easy')
+order_options = pyg_util.GameOptions(
+    (GLOBALBOARDSIZE + BOARDERSIZE + int(.55 * LOCALBOARDSIZE), LOCALBOARDSIZE + WHITESPACE), 'Random', 'Random',
+    'First', 'Second')
+"""End PyGame Initialization"""
 
 
-def draw_x(center):
-    """Draws a blue 'X' in the GUI centered at the given point"""
-    # Draws a blue 'X' given the center crossing point of the 'X'
-    pygame.draw.line(screen, BLUE, center, (center[0] + DIFF, center[1] + DIFF), 5)
-    pygame.draw.line(screen, BLUE, center, (center[0] - DIFF, center[1] + DIFF), 5)
-    pygame.draw.line(screen, BLUE, center, (center[0] + DIFF, center[1] - DIFF), 5)
-    pygame.draw.line(screen, BLUE, center, (center[0] - DIFF, center[1] - DIFF), 5)
+def init_variables():
+    """Initializes the game variables to their defaults."""
+    global global_board, player, bot, bot_alg, game_over, reset
+
+    # Global board
+    global_board = GlobalBoard()
+
+    player = 1  # player will always be 1 or 2. 1 -> 'X' and 2 -> 'O'
+
+    bot_alg = alg_options.get_option()
+    mode = order_options.get_option()
+
+    # Decide whether the bot goes first or second
+    if bot_alg == '2 Player':
+        bot = 0
+    elif mode == 'Random':
+        bot = rand.randint(1, 2)
+    elif mode == 'First':
+        bot = 2
+    elif mode == 'Second':
+        bot = 1
+
+    game_over = False  # break out of the game loop when the game ends
+    reset = False  # after the game, you are stuck in keep_alive() until reset == True
+
+    # global_board.print_board()  # command line
+    draw_board()  # GUI
+    draw_menu()  # GUI
+    pygame.display.flip()
 
 
-def draw_board():
-    """Displays the full global and local boards in the GUI"""
-    screen.fill(LIGHT_GRAY)
+def draw_menu():
+    """Draws the menu area on the right side of the GUI"""
+    pygame.draw.rect(screen, DARK_GRAY, MENUAREA)
+
+    # text box
+    update_text()
+
+    # Display Buttons
+    rulesbutton.draw(screen, False)
+    newgamebutton.draw(screen, False)
+    quitbutton.draw(screen, False)
+
+    alg_options.draw(screen)
+    order_options.draw(screen)
+
+
+def update_text():
+    """Updates the text displayed on the TextArea"""
+    if not game_over:
+        if player != bot:
+            if player == 1:
+                textarea.set_text("Player X:", "Make your move", screen, color=BLUE)
+            else:
+                textarea.set_text("Player O:", "Make your move", screen, color=RED)
+    else:
+        if player == 0:
+            textarea.set_text("The game is", "a draw.", screen)
+        elif player == 1:
+            textarea.set_text("Player X", "has won!", screen, color=BLUE)
+        else:
+            textarea.set_text("Player O", "has won!", screen, color=RED)
+
+
+def draw_board(update=True):
+    """Displays the full global and local boards in the GUI. Does not update the menu"""
+    pygame.draw.rect(screen, LIGHT_GRAY, GLOBALBOARDAREA)
 
     # For each local board
     for outer_x in range(3):
@@ -58,9 +139,12 @@ def draw_board():
 
                     # Draw an 'X' or 'O' if appropriate
                     if local_board.board[inner_y][inner_x] == 1:
-                        draw_x(center)
+                        draw_x(center, screen)
                     elif local_board.board[inner_y][inner_x] == 2:
                         pygame.draw.circle(screen, RED, center, DIFF, 4)
+
+    if update:
+        pygame.display.update(GLOBALBOARDAREA)
 
 
 # def get_lb_name(local_board):
@@ -148,9 +232,8 @@ def update_focus(old_row, old_col):
 
 def make_move(local_board, row_pos, col_pos):
     """Takes a local board and the coordinates of a space on the board, and marks the space for the current player"""
-    global player
-    global winner
-    global game_over
+
+    global player, game_over
 
     local_board.board[row_pos][col_pos] = player  # set space to player
 
@@ -162,118 +245,147 @@ def make_move(local_board, row_pos, col_pos):
 
         # Now check if this determines the outcome of the global board. If so, the game is over
         if global_board.has_tic_tac_toe(player):
-            winner = player
             game_over = True
         elif global_board.is_full():
             game_over = True
+            player = 0
 
     # if the local board is a draw
     elif local_board.is_full():
         local_board.playable = False
+        global_board.mark_global_board(local_board, -1)
+
+        if global_board.is_full():
+            game_over = True
 
     # update the focus of the local boards for the next turn
-    update_focus(row, col)
+    update_focus(row_pos, col_pos)
 
-    global_board.print_board()  # Command Line
+    # global_board.print_board()  # Command Line
     draw_board()  # GUI
-    pygame.display.update()
 
     # switch player 1 <-> 2
-    player = (player % 2) + 1
+    if not game_over:
+        player = (player % 2) + 1
+
+    update_text()
 
 
-# Global board
-global_board = boardclasses.GlobalBoard()
-global_board.print_board()  # command line
+def main():
+    """The main game loop. Initializes the global variables, then plays one game of ultimate tic tac toe"""
+    global reset
 
-player = 1  # player will always be 1 or 2. 1 -> 'X' and 2 -> 'O'
-winner = 0  # record the winner so it can be displayed
+    init_variables()
 
-# Decide whether the bot goes first or second
-bot = rand.randint(1, 2)  # bot goes first or second at random
-# bot = 0  # 2 player
-# bot = 1  # bot goes first
-# bot = 2  # bot goes second
-
-game_over = False  # break out of the game loop when the game ends
-
-
-"""PyGame Initialization"""
-pygame.init()
-
-# Board Dimensions
-SQUARESIZE = 65  # size of each square
-WHITESPACE = 65  # space in between local boards
-BOARDERSIZE = 32  # boarder between edge of screen and local boards
-LOCALBOARDSIZE = SQUARESIZE * 3  # total size of each local board
-DIFF = 25  # determines size of the 'X's and 'O's. Must be less than half of SQUARESIZE
-
-# Color Definitions
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-LIGHT_GRAY = (200, 200, 200)
-BLUE = (0, 0, 200)
-LIGHT_BLUE = (150, 150, 255)
-RED = (200, 0, 0)
-LIGHT_RED = (255, 150, 150)
-
-# Screen Dimensions
-width = SQUARESIZE * 9 + WHITESPACE * 3
-height = SQUARESIZE * 9 + WHITESPACE * 3
-
-size = (width, height)
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption("Ultimate Tic Tac Toe")
-
-draw_board()  # GUI
-pygame.display.update()
-"""End PyGame Initialization"""
-
-# Game loop
-while not game_over:
-    # Bot turn
-    if player == bot:
-        lb, row, col = minimax.bot_turn(global_board, bot)  # get the bot's move
-        make_move(lb, row, col)  # record the move and update the GUI
-    else:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-
-            # Human Turn
-            if event.type == pygame.MOUSEBUTTONUP and player != bot:
-                # checking !bot makes it easier to switch to 2 player
-
-                # Get lb, and row and col coordinates from get_inputs(). Check if lb is None
-                lb, row, col = get_inputs()
-                if lb is not None:
-                    # Check if selected space has already been played
-                    if lb.focus and lb.board[row][col] == 0:
-                        make_move(lb, row, col)
-
-            # If the mouse has not been clicked, draw a trail that shows whose turn it is
-            else:
+    # Game loop
+    while not game_over:
+        # Bot turn
+        if player == bot:
+            if bot_alg == 'Very Easy':
+                lb, row, col = minimax.bot_turn(global_board, bot)  # get the bot's move
+            make_move(lb, row, col)  # record the move and update the GUI
+        else:
+            for event in pygame.event.get():
                 mouse = pygame.mouse.get_pos()
 
-                # draw an 'X' or 'O' where the mouse is pointed
-                if player == 1:
-                    draw_x(mouse)
-                else:
-                    pygame.draw.circle(screen, RED, mouse, DIFF, 4)
+                # New Game Button
+                if newgamebutton.is_button_event(event, mouse):
+                    newgamebutton.draw(screen)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        reset = True
+                        return
 
-                # after the display is updated, redraw the board so that the 'X' or 'O' will disappear the next time the
-                # display is updated
-                pygame.display.update()
-                draw_board()
+                # Show Rules Button
+                elif rulesbutton.is_button_event(event, mouse):
+                    rulesbutton.draw(screen)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        rules.show_rules(screen)
+                        draw_board()
+                        rulesbutton.mode = 'normal'
+                        draw_menu()
+                        pygame.display.flip()
 
-# Display the game result
-if winner == 0:
-    print("\nThe game is a draw.")
-else:
-    print(f"\nPlayer {winner} has won!")
+                # Quit Button
+                elif quitbutton.is_button_event(event, mouse):  # Custom quit button
+                    quitbutton.draw(screen)
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        pygame.quit()
+                        sys.exit()
+                elif event.type == pygame.QUIT:  # Standard quit button
+                    pygame.quit()
+                    sys.exit()
 
-# Keep the screen up after the game ends until the user quits
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
+                elif alg_options.is_event(event, mouse, screen) or order_options.is_event(event, mouse, screen):
+                    pass
+
+                # Human Turn
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    # Get lb, and row and col coordinates from get_inputs(). Check if lb is None
+                    lb, row, col = get_inputs()
+                    if lb is not None:
+                        # Check if selected space has already been played
+                        if lb.focus and lb.board[row][col] == 0:
+                            make_move(lb, row, col)
+
+                # If the mouse has been moved and is within the global board, draw a trail that displays an X or O
+                # depending on the turn
+                elif event.type == pygame.MOUSEMOTION and mouse[0] < GLOBALBOARDSIZE - int(1.1 * DIFF):
+                    # draw an 'X' or 'O' where the mouse is pointed
+                    if player == 1:
+                        draw_x(mouse, screen)
+                    else:
+                        pygame.draw.circle(screen, RED, mouse, DIFF, 4)
+
+                    # after the display is updated, redraw the board so that the 'X' or 'O' will disappear the next
+                    # time the display is updated
+                    mousebox = pygame.Rect(mouse[0] - (DIFF // 2), mouse[1] - (DIFF // 2), DIFF,
+                                           DIFF)
+                    pygame.display.update(mousebox)
+                    draw_board(False)
+
+
+def keep_alive():
+    """Keep the screen up after the game ends until the user quits or resets"""
+    global reset
+    while not reset:
+        for event in pygame.event.get():
+            mouse = pygame.mouse.get_pos()
+
+            # New Game Button
+            if newgamebutton.is_button_event(event, mouse):
+                newgamebutton.draw(screen)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    reset = True
+                    return
+
+            # Show Rules Button
+            elif rulesbutton.is_button_event(event, mouse):
+                rulesbutton.draw(screen)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    rules.show_rules(screen)
+                    draw_board()
+                    rulesbutton.mode = 'normal'
+                    draw_menu()
+                    pygame.display.flip()
+
+            # Quit Button
+            elif quitbutton.is_button_event(event, mouse):
+                quitbutton.draw(screen)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    pygame.quit()
+                    sys.exit()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            elif alg_options.is_event(event, mouse, screen) or order_options.is_event(event, mouse, screen):
+                pass
+
+
+if __name__ == '__main__':
+    """After main(), the program will be stuck in keep_alive() until the game is reset or quit. If the user quits,
+    sys.exit() is called and the program will quit. If the user resets, the program will simply exit keep_alive(), and
+    the loop will start over."""
+    while True:
+        main()
+        keep_alive()

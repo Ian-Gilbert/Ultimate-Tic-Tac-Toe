@@ -1,5 +1,6 @@
 class TicTacToeBoard:
     """General board class. Extended by GlobalBoard and LocalBoard"""
+
     def __init__(self):
         # 3x3 grid of zeros. Will be set to 1 or 2 when the square is claimed
         self.board = [[0, 0, 0] for _ in range(3)]
@@ -30,13 +31,9 @@ class TicTacToeBoard:
         # If there is no tic tac toe
         return False
 
-    # is every space taken
     def is_full(self):
         """Checks if every space on the board has been played (i.e. there is a draw)"""
-        for row in range(3):
-            if 0 in self.board[row]:
-                return False
-        return True
+        return not any(0 in self.board[row] for row in range(3))
 
 
 """******************************************************************************************************************"""
@@ -47,24 +44,25 @@ class GlobalBoard(TicTacToeBoard):
         TicTacToeBoard.__init__(self)
         self.local_boards = [LocalBoard(i) for i in range(9)]  # 3x3 grid of local boards
 
-    # prints the local boards in the command line
     def print_board(self):
-        """Prints the board to the console"""
+        """Prints the board in the command line"""
         print()
         print('-' * 35)
         print()
 
         # each loop prints a row of the local boards
         for x in range(3):
-            print(self.local_boards[0].board[x], '\t', self.local_boards[1].board[x], '\t', self.local_boards[2].board[x])
+            print(self.local_boards[0].board[x], '\t', self.local_boards[1].board[x], '\t',
+                  self.local_boards[2].board[x])
         print()
         for x in range(3):
-            print(self.local_boards[3].board[x], '\t', self.local_boards[4].board[x], '\t', self.local_boards[5].board[x])
+            print(self.local_boards[3].board[x], '\t', self.local_boards[4].board[x], '\t',
+                  self.local_boards[5].board[x])
         print()
         for x in range(3):
-            print(self.local_boards[6].board[x], '\t', self.local_boards[7].board[x], '\t', self.local_boards[8].board[x])
+            print(self.local_boards[6].board[x], '\t', self.local_boards[7].board[x], '\t',
+                  self.local_boards[8].board[x])
 
-    # mark the global board when a local board has been won
     def mark_global_board(self, local_board, player):
         """Records when a local board has been won"""
         row = local_board.index // 3
@@ -80,4 +78,4 @@ class LocalBoard(TicTacToeBoard):
         TicTacToeBoard.__init__(self)
         self.focus = True
         self.playable = True
-        self.index = index
+        self.index = index  # The board's index in the local_boards list (from the GlobalBoard class)
