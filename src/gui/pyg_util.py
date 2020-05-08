@@ -1,6 +1,8 @@
 from typing import List  # also Tuple from src.gui.pyg_init
 from src.gui.pyg_init import *
 import sys
+from threading import Thread
+from time import sleep
 
 
 class Button:
@@ -48,16 +50,20 @@ class Button:
         self.hover_surface.blit(caption_surface, caption_rect)
 
         # draw border for normal button
-        pygame.draw.rect(self.normal_surface, BLACK, pygame.Rect((0, 0, w, h)), 1)  # black border around everything
+        pygame.draw.rect(self.normal_surface, BLACK, pygame.Rect(
+            (0, 0, w, h)), 1)  # black border around everything
         pygame.draw.line(self.normal_surface, WHITE, (1, 1), (w - 2, 1))
         pygame.draw.line(self.normal_surface, WHITE, (1, 1), (1, h - 2))
-        pygame.draw.line(self.normal_surface, DARK_GRAY, (1, h - 1), (w - 1, h - 1))
-        pygame.draw.line(self.normal_surface, DARK_GRAY, (w - 1, 1), (w - 1, h - 1))
+        pygame.draw.line(self.normal_surface, DARK_GRAY,
+                         (1, h - 1), (w - 1, h - 1))
+        pygame.draw.line(self.normal_surface, DARK_GRAY,
+                         (w - 1, 1), (w - 1, h - 1))
         pygame.draw.line(self.normal_surface, GRAY, (2, h - 2), (w - 2, h - 2))
         pygame.draw.line(self.normal_surface, GRAY, (w - 2, 2), (w - 2, h - 2))
 
         # draw border for down button
-        pygame.draw.rect(self.pressed_surface, BLACK, pygame.Rect((0, 0, w, h)), 1)  # black border around everything
+        pygame.draw.rect(self.pressed_surface, BLACK, pygame.Rect(
+            (0, 0, w, h)), 1)  # black border around everything
         pygame.draw.line(self.pressed_surface, WHITE, (1, 1), (w - 2, 1))
         pygame.draw.line(self.pressed_surface, WHITE, (1, 1), (1, h - 2))
         pygame.draw.line(self.pressed_surface, DARK_GRAY, (1, h - 2), (1, 1))
@@ -66,11 +72,14 @@ class Button:
         pygame.draw.line(self.pressed_surface, GRAY, (2, 2), (w - 3, 2))
 
         # draw border for highlight button
-        pygame.draw.rect(self.hover_surface, BLACK, pygame.Rect((0, 0, w, h)), 1)  # black border around everything
+        pygame.draw.rect(self.hover_surface, BLACK, pygame.Rect(
+            (0, 0, w, h)), 1)  # black border around everything
         pygame.draw.line(self.hover_surface, WHITE, (1, 1), (w - 2, 1))
         pygame.draw.line(self.hover_surface, WHITE, (1, 1), (1, h - 2))
-        pygame.draw.line(self.hover_surface, DARK_GRAY, (1, h - 1), (w - 1, h - 1))
-        pygame.draw.line(self.hover_surface, DARK_GRAY, (w - 1, 1), (w - 1, h - 1))
+        pygame.draw.line(self.hover_surface, DARK_GRAY,
+                         (1, h - 1), (w - 1, h - 1))
+        pygame.draw.line(self.hover_surface, DARK_GRAY,
+                         (w - 1, 1), (w - 1, h - 1))
         pygame.draw.line(self.hover_surface, GRAY, (2, h - 2), (w - 2, h - 2))
         pygame.draw.line(self.hover_surface, GRAY, (w - 2, 2), (w - 2, h - 2))
 
@@ -106,7 +115,8 @@ class GameOptionButton(Button):
     """Each option in the GameOptions menu. Extends Button class"""
 
     def __init__(self, pos: Tuple[int, int], text: str) -> None:
-        Button.__init__(self, pos, text, width=int(.45 * LOCALBOARDSIZE), height=int(.75 * SQUARESIZE))
+        Button.__init__(self, pos, text, width=int(.45 *
+                                                   LOCALBOARDSIZE), height=int(.75 * SQUARESIZE))
         self.selected: bool = False
 
         # Add selected surface
@@ -131,13 +141,18 @@ class GameOptionButton(Button):
         self.selected_surface.blit(caption_surface, caption_rect)
 
         # draw border around selected_surface
-        pygame.draw.rect(self.selected_surface, BLACK, pygame.Rect((0, 0, w, h)), 1)  # black border around everything
+        pygame.draw.rect(self.selected_surface, BLACK, pygame.Rect(
+            (0, 0, w, h)), 1)  # black border around everything
         pygame.draw.line(self.selected_surface, WHITE, (1, 1), (w - 2, 1))
         pygame.draw.line(self.selected_surface, WHITE, (1, 1), (1, h - 2))
-        pygame.draw.line(self.selected_surface, DARK_GRAY, (1, h - 1), (w - 1, h - 1))
-        pygame.draw.line(self.selected_surface, DARK_GRAY, (w - 1, 1), (w - 1, h - 1))
-        pygame.draw.line(self.selected_surface, GRAY, (2, h - 2), (w - 2, h - 2))
-        pygame.draw.line(self.selected_surface, GRAY, (w - 2, 2), (w - 2, h - 2))
+        pygame.draw.line(self.selected_surface, DARK_GRAY,
+                         (1, h - 1), (w - 1, h - 1))
+        pygame.draw.line(self.selected_surface, DARK_GRAY,
+                         (w - 1, 1), (w - 1, h - 1))
+        pygame.draw.line(self.selected_surface, GRAY,
+                         (2, h - 2), (w - 2, h - 2))
+        pygame.draw.line(self.selected_surface, GRAY,
+                         (w - 2, 2), (w - 2, h - 2))
 
     def draw_option(self, surface: pygame.Surface, update: bool = True) -> None:
         """Extends the draw() method from the Button class"""
@@ -163,7 +178,8 @@ class GameOptions:
         :param default: button selected by default
         :param options: the text to be displayed on each button (also the mode that the button will dictate)
         """
-        self.rect: pygame.Rect = pygame.Rect(pos, (int(.45 * LOCALBOARDSIZE), int(.75 * SQUARESIZE)))
+        self.rect: pygame.Rect = pygame.Rect(
+            pos, (int(.45 * LOCALBOARDSIZE), int(.75 * SQUARESIZE)))
         self.current_option: GameOptionButton
         self.options: List[GameOptionButton] = []
         for i in range(len(options)):
@@ -216,7 +232,9 @@ class TextArea:
 
         # Bottom half of the textarea
         self.bot_rect: pygame.Rect = pygame.Rect(GLOBALBOARDSIZE + BOARDERSIZE,
-                                                 BOARDERSIZE + (SQUARESIZE // 4) + (SQUARESIZE // 2),
+                                                 BOARDERSIZE +
+                                                 (SQUARESIZE // 4) +
+                                                 (SQUARESIZE // 2),
                                                  LOCALBOARDSIZE, SQUARESIZE // 2)
         self.bot_surface: pygame.Surface = pygame.Surface(self.bot_rect.size)
 
@@ -248,7 +266,8 @@ class RulesScreen:
     """Prints the rules of the game on the screen"""
 
     def __init__(self) -> None:
-        self.offset: Tuple[int, int] = (SQUARESIZE, SQUARESIZE)  # offset from the main screen
+        # offset from the main screen
+        self.offset: Tuple[int, int] = (SQUARESIZE, SQUARESIZE)
         self.rect: pygame.Rect = pygame.Rect(self.offset[0], self.offset[1], GLOBALBOARDSIZE - 2 * SQUARESIZE,
                                              GLOBALBOARDSIZE - 2 * SQUARESIZE)
         self.surface: pygame.Surface = pygame.Surface(self.rect.size)
@@ -265,9 +284,11 @@ class RulesScreen:
     def write_rules(self) -> None:
         for i in range(len(self.linesoftext)):
             line = self.linesoftext[i]
-            text_surface = FONT.render('> ' + line[:-1], True, GREEN)  # get rid of the newline character
+            # get rid of the newline character
+            text_surface = FONT.render('> ' + line[:-1], True, GREEN)
             text_rect = text_surface.get_rect()
-            text_rect.topleft = (8, 8 + 24 * i)  # placement of each line on the surface
+            # placement of each line on the surface
+            text_rect.topleft = (8, 8 + 24 * i)
             self.surface.blit(text_surface, text_rect)
 
     def show_rules(self, screen: pygame.display) -> None:
@@ -294,3 +315,49 @@ class RulesScreen:
                 elif event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
+
+"""******************************************************************************************************************"""
+
+
+class ProgressBar(Thread):
+    def __init__(self, screen: pygame.display, total_time: int, time_inc: int = 1) -> None:
+        Thread.__init__(self, target=self.draw_bar, args=(screen,))
+        self.total_time: int = total_time
+        self.time_inc: int = time_inc
+
+        self.buffer: int = 1
+        self.bar_inc: int = ((LOCALBOARDSIZE * time_inc) -
+                             (2 * self.buffer)) / total_time
+
+        self.rect: pygame.Rect = pygame.Rect(GLOBALBOARDSIZE + BOARDERSIZE, 2 * LOCALBOARDSIZE + 4.25 * BOARDERSIZE, LOCALBOARDSIZE,
+                                             .25 * SQUARESIZE)
+
+        self.surface: pygame.Surface = pygame.Surface(self.rect.size)
+        self.surface.fill(BLACK)
+        pygame.draw.rect(self.surface, MEDIUM_GRAY, self.rect)
+
+    def draw_bar(self, screen: pygame.display) -> None:
+        bar_rect = self.rect.inflate(-2 * self.buffer, -2 * self.buffer)
+        self.surface.fill(ORANGE, bar_rect)
+        screen.blit(self.surface, self.rect)
+        pygame.display.update(self.rect)
+
+        time = 0
+        count = 1
+        while time < self.total_time:
+            bar_rect.right = self.bar_inc * count
+            pygame.draw.rect(self.surface, ORANGE, bar_rect)
+            screen.blit(self.surface, self.rect)
+            pygame.display.update(self.rect)
+
+            time += self.time_inc
+            count += 1
+            sleep(self.time_inc)
+
+        # pygame.draw.rect(screen, DARK_GRAY, self.rect)
+        # pygame.display.update(self.rect)
+
+        self.surface.fill(ORANGE, bar_rect)
+        screen.blit(self.surface, self.rect)
+        pygame.display.update(self.rect)

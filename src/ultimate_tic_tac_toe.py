@@ -5,6 +5,7 @@ from src.boardclasses import GlobalBoard, LocalBoard
 from src import minimax
 from src.gui.pyg_init import *  # contains pygame import
 from src.gui import pyg_util
+import mcts
 
 
 """Game Setup Constants"""
@@ -15,7 +16,6 @@ BEGINNER = "Beginner"
 MCTS = "MCTS"
 FOO1 = "Foo 1"
 FOO2 = "Foo 2"
-FOO3 = "Foo 3"
 
 # Turn order
 RANDOM_ORDER = "Random"
@@ -30,6 +30,9 @@ pygame.init()
 screen: pygame.display = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
 pygame.display.set_caption("Ultimate Tic Tac Toe")
 
+# For testing bot v bot, and you don't want graphics.
+# screen = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
+
 rules = pyg_util.RulesScreen()
 
 # menu items
@@ -43,13 +46,15 @@ rulesbutton = pyg_util.Button(  # Show game rules
 )
 
 newgamebutton = pyg_util.Button(  # Start new game
-    (GLOBALBOARDSIZE + BOARDERSIZE, SCREENHEIGHT - BOARDERSIZE - int(2.75 * SQUARESIZE)),
+    (GLOBALBOARDSIZE + BOARDERSIZE, SCREENHEIGHT - \
+     BOARDERSIZE - int(2.75 * SQUARESIZE)),
     'New Game',
     colorfamily=GREEN_FAMILY
 )
 
 quitbutton = pyg_util.Button(  # Quit game
-    (GLOBALBOARDSIZE + BOARDERSIZE, SCREENHEIGHT - BOARDERSIZE - int(1.25 * SQUARESIZE)),
+    (GLOBALBOARDSIZE + BOARDERSIZE, SCREENHEIGHT - \
+     BOARDERSIZE - int(1.25 * SQUARESIZE)),
     'Quit Game',
     colorfamily=RED_FAMILY
 )
@@ -59,13 +64,14 @@ alg_options = pyg_util.GameOptions(  # Opponent settings
     BEGINNER,  # default value
     TWO_PLAYER,
     BEGINNER,
+    MCTS,
     FOO1,
-    FOO2,
-    FOO3
+    FOO2
 )
 
 order_options = pyg_util.GameOptions(  # Turn order settings
-    (GLOBALBOARDSIZE + BOARDERSIZE + int(0.55 * LOCALBOARDSIZE), LOCALBOARDSIZE + WHITESPACE),
+    (GLOBALBOARDSIZE + BOARDERSIZE + int(0.55 * \
+                                         LOCALBOARDSIZE), LOCALBOARDSIZE + WHITESPACE),
     RANDOM_ORDER,  # default value
     RANDOM_ORDER,
     PLAYER_FIRST,
@@ -94,7 +100,8 @@ class GlobalVariables:
             self.bot = 1
 
         self.game_over: bool = False  # break out of the game loop when the game ends
-        self.reset: bool = False  # after the game, you are stuck in keep_alive() until reset == True
+        # after the game, you are stuck in keep_alive() until reset == True
+        self.reset: bool = False
 
 
 GLOBALS = GlobalVariables()
@@ -121,9 +128,11 @@ def update_text() -> None:
     if not GLOBALS.game_over:
         if GLOBALS.bot_alg != 'minimax' or GLOBALS.player != GLOBALS.bot:
             if GLOBALS.player == 1:
-                textarea.set_text("Player X:", "Make your move", screen, color=BLUE)
+                textarea.set_text(
+                    "Player X:", "Make your move", screen, color=BLUE)
             else:
-                textarea.set_text("Player O:", "Make your move", screen, color=RED)
+                textarea.set_text(
+                    "Player O:", "Make your move", screen, color=RED)
     else:
         if GLOBALS.player == 0:
             textarea.set_text("The game is", "a draw.", screen)
@@ -144,35 +153,44 @@ def draw_board(update: bool = True) -> None:
             local_board = GLOBALS.global_board.local_board_list[outer_y * 3 + outer_x]
 
             # Top left coordinate of the current local board
-            board_origin_x = BOARDERSIZE + ((LOCALBOARDSIZE + WHITESPACE) * outer_x)
-            board_origin_y = BOARDERSIZE + ((LOCALBOARDSIZE + WHITESPACE) * outer_y)
+            board_origin_x = BOARDERSIZE + \
+                ((LOCALBOARDSIZE + WHITESPACE) * outer_x)
+            board_origin_y = BOARDERSIZE + \
+                ((LOCALBOARDSIZE + WHITESPACE) * outer_y)
 
             # Color the board accordingly if it is won by X or O, or if it is in focus
             if local_board.focus and not GLOBALS.game_over:  # if the game is over, nothing is in focus
-                pygame.draw.rect(screen, WHITE, (board_origin_x, board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
+                pygame.draw.rect(screen, WHITE, (board_origin_x,
+                                                 board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
             elif GLOBALS.global_board.board[outer_y][outer_x] == 1:
-                pygame.draw.rect(screen, LIGHT_BLUE, (board_origin_x, board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
+                pygame.draw.rect(screen, LIGHT_BLUE, (board_origin_x,
+                                                      board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
             elif GLOBALS.global_board.board[outer_y][outer_x] == 2:
-                pygame.draw.rect(screen, LIGHT_RED, (board_origin_x, board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
+                pygame.draw.rect(screen, LIGHT_RED, (board_origin_x,
+                                                     board_origin_y, LOCALBOARDSIZE, LOCALBOARDSIZE))
 
             # Draw the grid lines for the local board
             for i in range(4):
                 # Vertical Grid Lines
                 start_x = board_origin_x + (SQUARESIZE * i)
                 start_y = board_origin_y
-                pygame.draw.line(screen, BLACK, (start_x, start_y), (start_x, start_y + LOCALBOARDSIZE))
+                pygame.draw.line(screen, BLACK, (start_x, start_y),
+                                 (start_x, start_y + LOCALBOARDSIZE))
 
                 # Horizontal Grid Lines
                 start_x = board_origin_x
                 start_y = board_origin_y + (SQUARESIZE * i)
-                pygame.draw.line(screen, BLACK, (start_x, start_y), (start_x + LOCALBOARDSIZE, start_y))
+                pygame.draw.line(screen, BLACK, (start_x, start_y),
+                                 (start_x + LOCALBOARDSIZE, start_y))
 
             # For each square in the local board
             for inner_x in range(3):
                 for inner_y in range(3):
                     # Get the center of the square
-                    center_x = board_origin_x + (SQUARESIZE * inner_x) + SQUARESIZE // 2
-                    center_y = board_origin_y + (SQUARESIZE * inner_y) + SQUARESIZE // 2
+                    center_x = board_origin_x + \
+                        (SQUARESIZE * inner_x) + SQUARESIZE // 2
+                    center_y = board_origin_y + \
+                        (SQUARESIZE * inner_y) + SQUARESIZE // 2
                     center = (center_x, center_y)
 
                     # Draw an 'X' or 'O' if appropriate
@@ -252,9 +270,33 @@ def main() -> None:
     """The main game loop. Initializes the global variables, then plays one game of ultimate tic tac toe"""
 
     while not GLOBALS.game_over:
+        # Bot turn
+        # if GLOBALS.player == 1:
+        #     lb, row, col = minimax.bot_turn(GLOBALS.global_board, GLOBALS.bot)
+        #     make_move(lb, row, col)
+        # elif GLOBALS.player == 2:
+        #     bot_move = mcts.MCTS(GLOBALS.global_board, GLOBALS.player, 15)
+        #     # bot_move.start()
+        #     # bot_move.join()
+        #     bot_move.search()
+        #     lb, row, col = bot_move.get_next_move(GLOBALS.global_board)
+        #     make_move(lb, row, col)
         if GLOBALS.player == GLOBALS.bot:  # bot turn
             if GLOBALS.bot_alg == BEGINNER:
-                lb, row, col = minimax.bot_turn(GLOBALS.global_board, GLOBALS.bot)  # get the bot's move
+                lb, row, col = minimax.bot_turn(
+                    GLOBALS.global_board, GLOBALS.bot)  # get the bot's move
+            elif GLOBALS.bot_alg == MCTS:
+                bot_move = mcts.MCTS(GLOBALS.global_board, GLOBALS.player, 30)
+                # progress_bar = pyg_util.ProgressBar(screen, 30)
+
+                bot_move.start()
+                # progress_bar.start()
+
+                bot_move.join()
+                # progress_bar.join()
+
+                lb, row, col = bot_move.get_next_move(GLOBALS.global_board)
+                pygame.event.clear()
             else:
                 raise Exception("Undefined bot algorithm")
 
@@ -282,7 +324,8 @@ def main() -> None:
                         pygame.display.flip()
 
                 # Quit Button
-                elif quitbutton.is_button_event(event, mouse):  # Custom quit button
+                # Custom quit button
+                elif quitbutton.is_button_event(event, mouse):
                     quitbutton.draw(screen)
                     if event.type == pygame.MOUSEBUTTONUP:
                         pygame.quit()
@@ -374,3 +417,25 @@ if __name__ == '__main__':
         main()
         keep_alive()
         GLOBALS = GlobalVariables()
+
+    # x_wins = 0
+    # o_wins = 0
+    # draws = 0
+    #
+    # for game in range(1, 6):
+    #     main()
+    #     GLOBALS.global_board.print_board()
+    #     print()
+    #     if GLOBALS.player == 1:
+    #         print(f"Minimax wins game {game}.")
+    #         x_wins += 1
+    #     elif GLOBALS.player == 2:
+    #         print(f"MCTS wins game {game}.")
+    #         o_wins += 1
+    #     else:
+    #         print(f"Game {game} is a draw.")
+    #         draws += 1
+    #
+    #     GLOBALS = GlobalVariables
+    #
+    # print(f"\nMinimax won {x_wins} game(s), MCTS won {o_wins} game(s), and there were {draws} draw(s).")
