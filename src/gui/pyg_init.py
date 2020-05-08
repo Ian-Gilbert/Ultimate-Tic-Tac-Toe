@@ -1,3 +1,4 @@
+from typing import Tuple
 import pygame
 
 
@@ -13,6 +14,8 @@ MENUWIDTH = LOCALBOARDSIZE + 2 * BOARDERSIZE  # the width of the menu area
 DIFF = int(SQUARESIZE * 0.4)  # determines size of the 'X's and 'O's. Must be less than half of SQUARESIZE
 
 # Color Definitions
+RGBColor = Tuple[int, int, int]  # color type hint
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
@@ -33,11 +36,15 @@ LIGHT_BLUE = (150, 150, 255)
 MEDIUM_BLUE = (50, 50, 225)
 BLUE = (0, 0, 200)
 
+ORANGE = (255, 165, 0)
+
 # Color Families:
-GRAY_FAMILY = [MEDIUM_GRAY, GRAY]
-RED_FAMILY = [MEDIUM_RED, RED]
-GREEN_FAMILY = [MEDIUM_GREEN, GREEN]
-BLUE_FAMILY = [MEDIUM_BLUE, BLUE]
+ColorFamily = Tuple[RGBColor, RGBColor]  # color family type hint
+
+GRAY_FAMILY = (LIGHT_BLUE, MEDIUM_GRAY)
+RED_FAMILY = (MEDIUM_RED, RED)
+GREEN_FAMILY = (MEDIUM_GREEN, GREEN)
+BLUE_FAMILY = (MEDIUM_BLUE, BLUE)
 
 
 # Screen Dimensions
@@ -52,7 +59,7 @@ pygame.font.init()
 FONT = pygame.font.Font('freesansbold.ttf', 16)
 
 
-def draw_x(center, surface):
+def draw_x(center: Tuple[int, int], surface: pygame.Surface):
     """Draws a blue 'X' in the GUI centered at the given point"""
     # Draws a blue 'X' given the center crossing point of the 'X'
     pygame.draw.line(surface, BLUE, center, (center[0] + DIFF, center[1] + DIFF), 5)
