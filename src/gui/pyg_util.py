@@ -1,5 +1,5 @@
 from typing import List  # also Tuple from src.gui.pyg_init
-from src.gui.pyg_init import *
+from gui.pyg_init import *
 import sys
 
 
@@ -256,15 +256,15 @@ class RulesScreen:
                                          GLOBALBOARDSIZE - int(2.5 * SQUARESIZE) - self.offset[1]), 'OK')
 
         # Get the rules from rules.txt, and save each line in a list. File must end with a newline
-        with open("src/gui/rules.txt", 'r') as file:
-            self.linesoftext: List[str] = file.readlines()
+        with open("gui/rules.txt", 'r') as file:
+            self.lines_of_text: List[str] = file.readlines()
 
         self.write_rules()  # draw each line on the surface
         self.ok_button.draw(self.surface, False)
 
     def write_rules(self) -> None:
-        for i in range(len(self.linesoftext)):
-            line = self.linesoftext[i]
+        for i in range(len(self.lines_of_text)):
+            line = self.lines_of_text[i]
             text_surface = FONT.render('> ' + line[:-1], True, GREEN)  # get rid of the newline character
             text_rect = text_surface.get_rect()
             text_rect.topleft = (8, 8 + 24 * i)  # placement of each line on the surface

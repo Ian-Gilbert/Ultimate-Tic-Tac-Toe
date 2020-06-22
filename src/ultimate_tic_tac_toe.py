@@ -1,10 +1,10 @@
-from typing import Optional  # also Tuple from src.gui.pyg_init
+from typing import Optional  # also Tuple from gui.pyg_init
 import random as rand
 import sys
-from src.boardclasses import GlobalBoard, LocalBoard
-from src import minimax
-from src.gui.pyg_init import *  # contains pygame import
-from src.gui import pyg_util
+from boardclasses import GlobalBoard, LocalBoard
+import minimax
+from gui.pyg_init import *  # contains pygame import
+from gui import pyg_util
 
 
 """Game Setup Constants"""

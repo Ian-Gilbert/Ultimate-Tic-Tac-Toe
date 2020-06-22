@@ -14,7 +14,7 @@ from typing import Tuple, List, Optional
 from math import inf
 from random import choice
 from copy import deepcopy
-from src.boardclasses import TicTacToeBoard, LocalBoard, GlobalBoard
+from boardclasses import TicTacToeBoard, LocalBoard, GlobalBoard
 
 
 COMP: int
