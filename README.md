@@ -1,5 +1,7 @@
-# Ultimate Tic Tac Toe
+# Ultimate Tic Tac Toe [Abandoned]
 This is a game of Ultimate Tic Tac Toe, written in python. The GUI is created using PyGame.
+
+For my current version of this game, see my .NET api [here](https://github.com/Ian-Gilbert/uttt-svc).
 
 <p align="center">
 	<img src="Images/Completed Board.png" width=50%></img>
